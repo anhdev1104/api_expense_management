@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import connectDB from './config/connectDB.js';
 dotenv.config();
+import transactionRouter from './routes/transaction.js';
 
 const app = express();
 
@@ -14,6 +15,8 @@ app.use(cors());
 
 // CONNECT DATABASE
 connectDB(process.env.URI_DATABASE);
+
+app.use('/api/v1', transactionRouter);
 
 const PORT = process.env.PORT || 8081;
 app.listen(PORT, () => {
