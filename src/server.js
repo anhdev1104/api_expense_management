@@ -1,6 +1,8 @@
 import express from 'express';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
+import cors from 'cors';
+import connectDB from './config/connectDB.js';
 dotenv.config();
 
 const app = express();
@@ -8,10 +10,10 @@ const app = express();
 app.use(morgan('dev'));
 app.use(express.json({ limit: '30mb' }));
 app.use(express.urlencoded({ extended: true, limit: '30mb' }));
+app.use(cors());
 
-app.get('/', (req, res) => {
-  res.send('hello word');
-});
+// CONNECT DATABASE
+connectDB(process.env.URI_DATABASE);
 
 const PORT = process.env.PORT || 8081;
 app.listen(PORT, () => {
