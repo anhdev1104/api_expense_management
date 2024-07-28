@@ -18,3 +18,21 @@ export const addCategory = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+
+export const updateCategory = async (req, res) => {
+  try {
+    await Category.findByIdAndUpdate(req.params.id, req.body);
+    return res.status(200).json('Cập nhập thành công !');
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+export const deleteCategory = async (req, res) => {
+  try {
+    await Category.findByIdAndDelete(req.params.id, req.body);
+    return res.status(200).json('Xoá thành công !');
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
