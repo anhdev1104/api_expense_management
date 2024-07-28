@@ -21,3 +21,21 @@ export const addTransaction = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+
+export const updateTransaction = async (req, res) => {
+  try {
+    await Transaction.findByIdAndUpdate(req.params.id, req.body);
+    return res.status(200).json('Cập nhập thành công !');
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+export const deleteTransaction = async (req, res) => {
+  try {
+    await Transaction.findByIdAndDelete(req.params.id);
+    return res.status(200).json('Xoá giao dịch thành công.');
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
