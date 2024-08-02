@@ -9,6 +9,15 @@ export const getCategories = async (req, res) => {
   }
 };
 
+export const getCategoryByType = async (req, res) => {
+  try {
+    const data = await Category.find({ type: req.params.type });
+    return res.status(200).json(data);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
 export const addCategory = async (req, res) => {
   try {
     const newCategory = new Category(req.body);
