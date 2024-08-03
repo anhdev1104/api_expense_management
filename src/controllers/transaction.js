@@ -12,6 +12,15 @@ export const getTransaction = async (req, res) => {
   }
 };
 
+export const getTransactionByType = async (req, res) => {
+  try {
+    const data = await Transaction.find({ type: req.params.type });
+    return res.status(200).json(data);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
 export const addTransaction = async (req, res) => {
   try {
     const newTransaction = new Transaction(req.body);
