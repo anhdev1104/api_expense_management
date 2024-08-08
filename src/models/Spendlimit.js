@@ -1,18 +1,12 @@
 import mongoose from 'mongoose';
 
-const transactionSchema = new mongoose.Schema(
+const spendlimitSchema = new mongoose.Schema(
   {
-    type: {
-      type: String,
-      enum: ['expense', 'income'],
-      required: true,
-    },
     date: {
       type: Date,
       required: true,
     },
-    description: String,
-    money: {
+    moneylimit: {
       type: Number,
       required: true,
     },
@@ -24,5 +18,5 @@ const transactionSchema = new mongoose.Schema(
   { timestamps: true, versionKey: false }
 );
 
-const Transaction = mongoose.model('Transaction', transactionSchema);
-export default Transaction;
+const Spendlimit = mongoose.model('Spendlimit', spendlimitSchema);
+export default Spendlimit;

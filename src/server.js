@@ -6,6 +6,7 @@ import connectDB from './config/connectDB.js';
 dotenv.config();
 import transactionRouter from './routes/transaction.js';
 import categoriesRouter from './routes/categories.js';
+import spendlimitRouter from './routes/spendlimit.js';
 
 const app = express();
 
@@ -19,6 +20,7 @@ connectDB(process.env.URI_DATABASE);
 
 app.use('/api/v1', transactionRouter);
 app.use('/api/v1', categoriesRouter);
+app.use('/api/v1', spendlimitRouter);
 
 const PORT = process.env.PORT || 8081;
 app.listen(PORT, () => {
