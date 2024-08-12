@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import Accounts from '../models/Accounts.js';
-import { generateAccessToken } from '../services/jwtService.js';
+import { generateAccessToken, generateRefreshToken } from '../services/jwtService.js';
 
 export const getAccounts = async (req, res) => {
   try {
@@ -41,7 +41,20 @@ export const login = async (req, res) => {
     // Authorization
     if (account && validPassword) {
       const accessToken = generateAccessToken(account);
-      return res.status(200).json({ accessToken });
+      const refreshToken = generateRefreshToken(account);
+      res.cookie('refreshToken', refreshToken, {
+        sameSite: 'Lax',
+        httpOnly: true,
+        secure: process.env.SECURE === 'production',
+      });
+      const { password, ...hashedAccount } = account._doc; // tách password tăng tính bảo mật
+      return res.status(200).json({
+        accessToken,
+        data: {
+          ...hashedAccount,
+        },
+        expiresIn: process.env.JWT_ACCESS_EXP,
+      });
     }
   } catch (error) {
     return res.status(500).json({ error: error.message });
