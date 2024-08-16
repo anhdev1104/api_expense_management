@@ -1,4 +1,5 @@
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 import Accounts from '../models/Accounts.js';
 import { generateAccessToken, generateRefreshToken } from '../services/jwtService.js';
 
@@ -42,11 +43,16 @@ export const login = async (req, res) => {
     if (account && validPassword) {
       const accessToken = generateAccessToken(account);
       const refreshToken = generateRefreshToken(account);
-      res.cookie('refreshToken', refreshToken, {
-        sameSite: 'Lax',
-        httpOnly: true,
-        secure: process.env.SECURE === 'production',
-      });
+
+      res.cookie(
+        'refreshToken',
+        refreshToken
+        // {
+        //   sameSite: 'Strict',
+        //   httpOnly: true,
+        //   secure: process.env.SECURE === 'production',
+        // }
+      );
       const { password, ...hashedAccount } = account._doc; // tách password tăng tính bảo mật
       return res.status(200).json({
         accessToken,
@@ -58,5 +64,23 @@ export const login = async (req, res) => {
     }
   } catch (error) {
     return res.status(500).json({ error: error.message });
+  }
+};
+
+export const requestRefreshToken = async (req, res) => {
+  try {
+    const { token: refreshToken } = req.body;
+    if (!refreshToken) return res.status(401).json({ message: 'Bạn chưa xác thực !' });
+
+    jwt.verify(refreshToken, process.env.JWT_REFRESH_KEY, (err, user) => {
+      if (err) {
+        console.log(err);
+      }
+      // tạo mới accessToken
+      const newAccessToken = generateAccessToken(user);
+      return res.status(200).json({ accessToken: newAccessToken });
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
   }
 };
