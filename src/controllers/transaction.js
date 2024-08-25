@@ -12,6 +12,33 @@ export const getTransaction = async (req, res) => {
   }
 };
 
+export const getTransactionDetails = async (req, res) => {
+  const { month, year } = req.query;
+
+  // Kiểm tra xem month và year có tồn tại không
+  if (!month || !year) {
+    return res.status(400).json('Tháng và năm là bắt buộc!');
+  }
+
+  // Khởi tạo startDate và endDate dựa trên tháng và năm
+  const startDate = new Date(Date.UTC(year, month - 1, 1)); // Tháng trong JavaScript bắt đầu từ 0
+  const endDate = new Date(Date.UTC(year, month, 1)); // Tháng tới
+
+  try {
+    // Thực hiện truy vấn với startDate và endDate
+    const data = await Transaction.find({
+      category: req.params.category,
+      date: { $gte: startDate, $lt: endDate },
+    }).populate('category'); // Phải truyền chuỗi tên trường vào populate
+
+    // Trả về kết quả
+    return res.status(200).json(data);
+  } catch (error) {
+    // Xử lý lỗi
+    return res.status(500).json({ error: error.message });
+  }
+};
+
 export const getTransactionByType = async (req, res) => {
   try {
     const data = await Transaction.find({ type: req.params.type });
