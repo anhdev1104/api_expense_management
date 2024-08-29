@@ -1,3 +1,4 @@
+import Spendlimit from '../models/Spendlimit.js';
 import Transaction from '../models/Transactions.js';
 
 export const getTransaction = async (req, res) => {
@@ -15,7 +16,6 @@ export const getTransaction = async (req, res) => {
 export const getTransactionDetails = async (req, res) => {
   const { month, year } = req.query;
 
-  // Kiểm tra xem month và year có tồn tại không
   if (!month || !year) {
     return res.status(400).json('Tháng và năm là bắt buộc!');
   }
@@ -25,16 +25,13 @@ export const getTransactionDetails = async (req, res) => {
   const endDate = new Date(Date.UTC(year, month, 1)); // Tháng tới
 
   try {
-    // Thực hiện truy vấn với startDate và endDate
     const data = await Transaction.find({
       category: req.params.category,
       date: { $gte: startDate, $lt: endDate },
-    }).populate('category'); // Phải truyền chuỗi tên trường vào populate
+    }).populate('category');
 
-    // Trả về kết quả
     return res.status(200).json(data);
   } catch (error) {
-    // Xử lý lỗi
     return res.status(500).json({ error: error.message });
   }
 };
@@ -66,7 +63,28 @@ export const getTransactionByDate = async (req, res) => {
 
 export const addTransaction = async (req, res) => {
   try {
-    const newData = { ...req.body, date: new Date(req.body.date) };
+    const { date, category, money } = req.body;
+    const inputDate = new Date(date);
+    const year = inputDate.getUTCFullYear();
+    const month = inputDate.getUTCMonth();
+
+    const filterDateOfCategory = {
+      category,
+      date: {
+        $gte: new Date(Date.UTC(year, month, 1)), // Ngày đầu tiên của tháng
+        $lt: new Date(Date.UTC(year, month + 1, 1)), // Ngày đầu tiên của tháng tiếp theo
+      },
+    };
+
+    const data = await Spendlimit.find(filterDateOfCategory);
+    const dataTransaction = await Transaction.find(filterDateOfCategory);
+    const totalExpense = dataTransaction.reduce((acc, curr) => acc + curr.money, 0);
+
+    if (totalExpense > data[0]?.moneylimit || money > data[0]?.moneylimit) {
+      return res.status(400).json({ message: 'Số tiền chi tiêu vượt quá hạn mức của danh mục trong tháng !' });
+    }
+
+    const newData = { ...req.body, date: inputDate };
     const newTransaction = new Transaction(newData);
     await newTransaction.save();
     return res.status(200).json('Thêm giao dịch thành công.');
